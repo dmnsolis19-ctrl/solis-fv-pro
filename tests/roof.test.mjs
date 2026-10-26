@@ -71,7 +71,7 @@ test('Roof JSON roundtrip, old schema defaults, catalog dimensions and report/ex
  assert.ok(!svg.includes('<script>'));assert.ok(!svg.includes('<img src=x'));assert.ok(svg.includes('&lt;img'));assert.ok(!svg.includes('data-roof-cell'));
  assert.deepEqual(parseProject(projectJSON(raw)),r.p);assert.equal(parseProject(JSON.stringify({schema:'solis-fv-project/v1',inputs:{project:'Antiguo'}})).roofLayout,false);
  const cat=applyCatalog(DEFAULTS,'panel','jinko-550n-bdv');near(cat.panelWidth*cat.panelLength,cat.panelArea);
- const sheets=reportSheets(r);assert.equal(sheets.length,8);const rows=sheets.at(-1).rows;assert.equal(rows.find(x=>x[0]==='Módulos requeridos')[1],r.panels);assert.equal(rows.find(x=>x[0]==='Módulos representados')[1],r.roofPlan.placed);
+ const sheets=reportSheets(r);assert.equal(sheets.length,9);const rows=sheets.at(-1).rows;assert.equal(rows.find(x=>x[0]==='Módulos requeridos')[1],r.panels);assert.equal(rows.find(x=>x[0]==='Módulos representados')[1],r.roofPlan.placed);
  const html=buildReport(r);assert.ok(html.includes('Cubierta y distribución'));assert.ok(html.includes('NO CABE'));assert.ok(!html.includes('<img src=x'));assert.ok(html.includes('<svg'));
- assert.equal(reportSheets(calculate(DEFAULTS)).length,7);assert.ok(!buildReport(calculate(DEFAULTS)).includes('Cubierta y distribución conceptual'));
+ assert.equal(reportSheets(calculate(DEFAULTS)).length,8);assert.ok(!buildReport(calculate(DEFAULTS)).includes('Cubierta y distribución conceptual'));
 });

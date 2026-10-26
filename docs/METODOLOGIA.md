@@ -1,3 +1,7 @@
+# Ampliaciones en v1.3
+
+Unifilar conceptual derivado del resultado y revisión declarada por el usuario. No añade selecciones automáticas de protecciones ni cambia la energía o el presupuesto. El contexto de cada revisión registra los parámetros y resultados relacionados; una diferencia marca el registro para revisar de nuevo. Una coincidencia recupera la vigencia del contexto anterior. Ver [UNIFILAR_Y_REVISION.md](UNIFILAR_Y_REVISION.md).
+
 # Ampliaciones en v1.2
 
 Cubierta rectangular 2D, patrones vertical/horizontal uniformes, retiros y exclusiones por intersección con obstáculos y resguardos. La geometría limita la viabilidad cuando se activa, sin reducir automáticamente los módulos. El ajuste explícito conserva el consumo y disminuye la cobertura objetivo, respetando strings y límites de entrada. Ver [CUBIERTA_2D.md](CUBIERTA_2D.md) para fórmulas, coordenadas y límites. No determina rutas eléctricas ni sombras o estructura.

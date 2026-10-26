@@ -1,6 +1,6 @@
 {
   "name": "solis-fv-pro",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "description": "Predimensionamiento fotovoltaico, strings, conductores y materiales",
@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
-    "build": "node scripts/build.mjs",
-    "check": "node --check public/app.js && node --check public/engine.js && node --check public/exports.js && node --check public/persistence.js && node --check public/advanced-ui.js && node --check public/roof.js && node --check public/roof-svg.js && node --check public/roof-ui.js && node --check public/solar.js && node --check public/report.js && node --check server/solar-handler.js"
+    "build": "node scripts/release.mjs",
+    "check": "node --check public/app.js && node --check public/engine.js && node --check public/exports.js && node --check public/persistence.js && node --check public/advanced-ui.js && node --check public/roof.js && node --check public/roof-svg.js && node --check public/roof-ui.js && node --check public/review.js && node --check public/schematic.js && node --check public/schematic-ui.js && node --check public/solar.js && node --check public/report.js && node --check server/solar-handler.js"
   }
 }

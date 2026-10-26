@@ -10,7 +10,7 @@ test('CSV neutralizes formulas and quotes embedded separators',()=>{
 test('Real XLSX ZIP signatures, workbook parts and no executable formulas',()=>{
  const r=calculate({...DEFAULTS,panelModel:'=DANGER()'}),sheets=reportSheets(r),data=workbookBytes(sheets);
  assert.equal(new DataView(data.buffer).getUint32(0,true),0x04034b50);
- const text=new TextDecoder().decode(data);assert.ok(text.includes('[Content_Types].xml'));assert.ok(text.includes('xl/workbook.xml'));assert.ok(text.includes('inlineStr'));assert.ok(text.includes('=DANGER()'));assert.ok(!text.includes('<f>'));assert.equal(sheets.length,7);
+ const text=new TextDecoder().decode(data);assert.ok(text.includes('[Content_Types].xml'));assert.ok(text.includes('xl/workbook.xml'));assert.ok(text.includes('inlineStr'));assert.ok(text.includes('=DANGER()'));assert.ok(!text.includes('<f>'));assert.equal(sheets.length,8);
 });
 test('Project JSON roundtrip preserves all parameters and rejects wrong schemas',()=>{
  const inputs={...DEFAULTS,project:'Proyecto "Sol" <2026>',unitPrices:{'FV-01':999}};

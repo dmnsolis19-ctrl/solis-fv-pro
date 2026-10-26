@@ -1,4 +1,4 @@
-# Actualizar a SOLIS FV Pro 1.2.0
+# Actualizar a SOLIS FV Pro 1.3.0
 
 ## Desde GitHub Desktop
 
@@ -7,11 +7,26 @@
 3. En GitHub Desktop selecciona el repositorio existente y **Repository → Show in Explorer**.
 4. Copia el contenido de la nueva carpeta `solis-fv-pro` dentro de tu repositorio. Reemplaza los archivos con el mismo nombre. Conserva la carpeta `.git` de tu repositorio.
 5. Comprueba que `package.json`, `public`, `server`, `functions` y `wrangler.jsonc` estén directamente en la raíz, sin otra carpeta intermedia.
-6. En **Changes**, escribe `Actualizar SOLIS FV Pro a 1.2.0`, pulsa **Commit to main** y después **Push origin**.
+6. En **Changes**, escribe `Actualizar SOLIS FV Pro a 1.3.0`, pulsa **Commit to main** y después **Push origin**.
 
 No crees otro repositorio si ya subiste la versión anterior. No copies el ZIP como sustituto del código.
 
-## Cloudflare Pages desde GitHub
+## Mantener el Worker ya publicado
+
+Conserva el proyecto y su dominio. En **Settings → Builds**, deja:
+
+| Campo | Valor |
+| --- | --- |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy --config wrangler.worker.jsonc` |
+| Root directory | `/` si el código está en la raíz |
+| Rama | `main` |
+
+El ZIP incluye `wrangler.worker.jsonc`, con `server/worker.js`, assets y la API solar. No cambies al comando `wrangler pages deploy` dentro de este flujo de Workers Builds. Subir mediante GitHub Desktop y hacer Push debe activar el despliegue si conservas la conexión existente.
+
+En v1.3, `npm run build` comprueba sintaxis y corre las pruebas antes de crear `dist`; un fallo detiene la publicación. Copia también `tests` y `scripts`. No es necesario crear otro token ni proyecto si tu despliegue actual ya funciona y mantienes la misma cuenta y permisos.
+
+## Alternativa: Cloudflare Pages desde GitHub
 
 | Campo | Valor |
 | --- | --- |
@@ -37,14 +52,15 @@ No uses `npx wrangler deploy` sin indicar esa configuración al elegir Workers. 
 
 ## Validación después de publicar
 
-1. Confirma que la interfaz muestre **v1.2.0**.
+1. Confirma que la interfaz muestre **v1.3.0**.
 2. Abre **Ubicación y recurso**, verifica las coordenadas del sitio, inclinación y azimut y pulsa **Consultar recurso PVGIS**.
 3. Una respuesta correcta mostrará PVGIS-ERA5, período disponible, fecha de consulta y 12 HSP mensuales. La cobertura de cada coordenada la determina el proveedor.
 4. Selecciona un módulo e inversor desde **Catálogo técnico** y revisa las alertas.
 5. Abre **Cubierta 2D**, comprueba las dimensiones reales y activa la verificación. Añade un obstáculo, edita su posición, excluye/restaura una celda y exporta SVG/Excel. Confirma que la cantidad del plano y materiales coincida tras un ajuste explícito de cobertura.
 6. Abre **Comparar diseños** y comprueba cada alternativa.
-7. En **Informe y revisiones**, completa empresa, responsable, revisor, código y revisión; carga el logo, guarda y abre la vista previa.
-8. En imprimir, selecciona **Guardar como PDF**, papel A4 y activa gráficos de fondo si quieres conservar los colores. El informe usa orientación vertical.
+7. Abre **Unifilar y revisión**, comprueba circuitos y exporta SVG. Registra una revisión con responsable y referencia. Cambia una ruta eléctrica relacionada y comprueba el aviso «Revisar por cambios».
+8. En **Informe y revisiones**, completa empresa, responsable, revisor, código y revisión; carga el logo, guarda y abre la vista previa.
+9. En imprimir, selecciona **Guardar como PDF**, papel A4 y activa gráficos de fondo si quieres conservar los colores. El informe usa orientación vertical.
 
 ## Si PVGIS no responde
 

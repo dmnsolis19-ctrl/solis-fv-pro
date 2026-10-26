@@ -2,14 +2,15 @@
 import {solarMatches,solarRequest} from './solar.js';
 import {catalogStatus} from './catalog.js';
 import {ROOF_DEFAULTS,roofErrors,layoutRoof} from './roof.js';
-export const VERSION = '1.2.0';
+import {REVIEW_DEFAULTS,reviewErrors} from './review.js';
+export const VERSION = '1.3.0';
 export const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 export const DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
 // Illustrative ampacities ONLY. User must replace and explicitly verify against installation method.
 export const SECTIONS = [1.5,2.5,4,6,10,16,25,35,50,70,95,120];
 export const DEMO_AMPACITY = [15,20,26,34,46,61,80,99,119,151,182,210];
 export const DEFAULTS = Object.freeze({
-  ...ROOF_DEFAULTS,
+  ...ROOF_DEFAULTS,...REVIEW_DEFAULTS,
   project:'Residencia Los Olivos', client:'Cliente de ejemplo', location:'Chile · recurso solar manual', company:'SOLIS Ingeniería', engineer:'',
   consumption:680, period:'month', coverage:100, hsp:4.5, performance:80, roof:60, spaceFactor:1.2,
   system:'hybrid', phase:'single', voltage:230, gridKw:9.2, pf:1, dcAcRatio:1.2,
@@ -83,7 +84,7 @@ export function normalize(raw) {
     try {validateHourly(p.hourlyProfile);}catch(error){errors.push(error.message);}
   }
   if(!p.unitPrices||typeof p.unitPrices!=='object'||Array.isArray(p.unitPrices)||Object.entries(p.unitPrices).some(([k,v])=>!/^[A-Z0-9-]{1,20}$/.test(k)||typeof v!=='number'||!Number.isFinite(v)||v<0||v>1e12)) errors.push('Precios unitarios no válidos.');
-  errors.push(...roofErrors(p));
+  errors.push(...roofErrors(p),...reviewErrors(p));
   if(errors.length) throw new InputError(errors);
   return p;
 }

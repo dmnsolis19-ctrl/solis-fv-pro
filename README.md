@@ -1,8 +1,17 @@
-# SOLIS FV Pro 1.2.0
+# SOLIS FV Pro 1.3.0
 
-Plataforma web en español para predimensionamiento fotovoltaico y simulación horaria con datos importados. Lista para GitHub y Cloudflare Pages/Workers, con cubierta 2D, consulta solar por servidor, catálogo técnico, comparación de diseños e informe con identidad y revisión documental.
+Plataforma web en español para predimensionamiento fotovoltaico y simulación horaria con datos importados. Lista para GitHub y Cloudflare Pages/Workers, con unifilar conceptual, revisión técnica, cubierta 2D, consulta solar por servidor, catálogo técnico, comparación de diseños e informe con identidad y revisión documental.
 
 ## Cambios de esta versión
+
+- **Unifilar conceptual:** topología actualizada desde el motor, circuitos DC/AC/empalme, EPS separado y banco de baterías cuando corresponde. Descarga SVG y página opcional en el informe PDF.
+- **Revisión técnica:** 10 puntos orientativos con responsable, fecha y referencia/justificación. Estados pendiente, revisado por usuario, no aplica justificado y revisar por cambios. No certifica ni sustituye la ingeniería.
+- **Contexto técnico:** los cambios relacionados dejan los registros anteriores pendientes de nueva revisión; modificar precios o notas documentales no los invalida. Conserva el registro anterior y su contexto en JSON.
+- **Excel:** hoja de revisión técnica y circuitos. 8 hojas generales, 9 con cubierta activa.
+- **Publicación controlada:** `npm run build` verifica sintaxis y ejecuta las 55 pruebas antes de generar `dist`. Un fallo detiene la compilación para que Cloudflare no continúe al despliegue.
+- **Workers:** guía actualizada para conservar `npx wrangler deploy --config wrangler.worker.jsonc`, el flujo que usa el proyecto desplegado.
+
+## Funciones de v1.2 conservadas
 
 - **Cubierta 2D:** techo rectangular coplanar, retiros, dimensiones reales del módulo, separación lateral y de filas. Compara patrones regulares vertical/horizontal.
 - **Edición:** obstáculos y pasillos rectangulares con resguardo, arrastre, coordenadas editables, exclusión de celdas y deshacer las últimas 20 ediciones del plano.
@@ -36,7 +45,7 @@ npm test
 npm run build
 ```
 
-La compilación genera `dist/`. El servidor local también sirve `/api/solar`; el acceso a PVGIS depende de la red del equipo y del servicio externo.
+La compilación comprueba la sintaxis y ejecuta las pruebas antes de generar `dist/`. Se necesitan también las carpetas `tests` y `scripts` en GitHub. Un fallo detiene la publicación. El servidor local también sirve `/api/solar`; el acceso a PVGIS depende de la red del equipo y del servicio externo.
 
 ## Actualizar y publicar
 
@@ -65,7 +74,7 @@ La carga de un ZIP estático por el panel conserva cálculos manuales y catálog
 
 ## Funciones conservadas
 
-Consumo en kWh/día, mes o año; cobertura; módulos y superficie; inversor automático/manual; strings iguales y MPPT; Voc frío y Vmp caliente; cables Cu de empalme, AC, EPS y por string DC; autonomía y baterías; CSV anual UTC 8760/8784 h; clipping, pérdidas y batería equivalente AC; materiales con precios individuales; finanzas; Excel real de 7 hojas (8 con cubierta activa), CSV, JSON e impresión a PDF; proyectos y borrador locales.
+Consumo en kWh/día, mes o año; cobertura; módulos y superficie; inversor automático/manual; strings iguales y MPPT; Voc frío y Vmp caliente; cables Cu de empalme, AC, EPS y por string DC; autonomía y baterías; CSV anual UTC 8760/8784 h; clipping, pérdidas y batería equivalente AC; materiales con precios individuales; finanzas; Excel real de 8 hojas (9 con cubierta activa), CSV, JSON e impresión a PDF; proyectos y borrador locales.
 
 ## Uso recomendado
 
@@ -77,7 +86,8 @@ Consumo en kWh/día, mes o año; cobertura; módulos y superficie; inversor auto
 6. Si hay datos horarios, importa el CSV anual y revisa pérdidas. Este perfil prevalece sobre demanda y HSP mensuales.
 7. Materiales: ajusta precios y partidas. No son cotizaciones del fabricante.
 8. Comparación: revisa alternativas y alertas; sin perfil horario la batería no mejora automáticamente el autoconsumo supuesto.
-9. Informe: completa identidad y revisión; guarda emisión y exporta JSON de respaldo. Genera PDF desde la vista previa.
+9. Unifilar y revisión: registra referencias técnicas verificadas por el responsable. Revisa cualquier estado invalidado por cambios.
+10. Informe: completa identidad y revisión; guarda emisión y exporta JSON de respaldo. Genera PDF desde la vista previa.
 
 ## Límites que debes conocer
 
@@ -94,10 +104,12 @@ Consumo en kWh/día, mes o año; cobertura; módulos y superficie; inversor auto
 
 ## Validación
 
-45 pruebas automáticas: geometría, retiros y separaciones, obstáculos/resguardos, unión de áreas, exclusiones, límites, ajuste de cobertura, coherencia de BOM, SVG/Excel/informe y migración; además del motor original, conversión de azimut, transformación de irradiación a HSP, procedencia, rechazo de coordenadas/plano incorrectos, API y caché, errores externos, catálogo, corrientes AC de ficha, incompatibilidades, comparación aislada, compatibilidad JSON, emisiones, informe y seguridad del texto, logo en Excel, y proyección cartográfica. Incluye 200 escenarios deterministas de strings y 120 de geometría dentro de la suite.
+55 pruebas automáticas: topología grid/híbrida, EPS, revisiones requeridas, invalidación por cambios, estados inactivos, independencia de los errores, esquema importado y exportación, además de geometría, retiros y separaciones, obstáculos/resguardos, unión de áreas, exclusiones, límites, ajuste de cobertura, coherencia de BOM, SVG/Excel/informe y migración; además del motor original, conversión de azimut, transformación de irradiación a HSP, procedencia, rechazo de coordenadas/plano incorrectos, API y caché, errores externos, catálogo, corrientes AC de ficha, incompatibilidades, comparación aislada, compatibilidad JSON, emisiones, informe y seguridad del texto, logo en Excel, y proyección cartográfica. Incluye 200 escenarios deterministas de strings y 120 de geometría dentro de la suite.
 
 ## Código
 
+- `public/schematic.js`, `schematic-ui.js`, `review.js`: topología, editor de revisión y contexto técnico.
+- `scripts/release.mjs`: validaciones obligatorias antes de compilar.
 - `public/roof.js`, `roof-svg.js`, `roof-ui.js`: geometría, render de plano y editor.
 - `public/engine.js`: motor determinista y validación.
 - `public/solar.js`: contrato PVGIS y procedencia.
@@ -115,6 +127,7 @@ Consumo en kWh/día, mes o año; cobertura; módulos y superficie; inversor auto
 - [Actualización y despliegue](docs/ACTUALIZAR.md)
 - [Catálogo, recurso y fuentes](docs/CATALOGO_Y_RECURSO.md)
 - [Fórmulas del motor](docs/METODOLOGIA.md)
+- [Unifilar y revisión técnica](docs/UNIFILAR_Y_REVISION.md)
 - [Cubierta 2D y criterios](docs/CUBIERTA_2D.md)
 - [CSV horario](docs/PERFIL_HORARIO.md)
 - [Evolución pendiente](docs/EVOLUCION.md)
