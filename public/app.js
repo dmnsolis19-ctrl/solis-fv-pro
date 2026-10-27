@@ -123,7 +123,7 @@ function doExport(type){clearTimeout(timer);updateResults();if(!result)return;co
  if(type==='xlsx')download(workbookBytes(reportSheets(result)),name+'.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
  if(type==='csv')download(materialsCSV(result),name+'-materiales.csv','text/csv;charset=utf-8');
  if(type==='json')download(projectJSON(p),name+'.json','application/json');
- if(type==='pdf')advanced.print();
+ if(type==='pdf')advanced.downloadPDF();
  $('#export-menu').hidden=true;$('#export-button').setAttribute('aria-expanded','false');
 }
 document.addEventListener('click',async event=>{

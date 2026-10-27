@@ -1,3 +1,4 @@
+import {MARKET_PRODUCTS,MARKET_DATE} from './market-data.js';
 export const CATALOG_REVISION='2026-10-26';
 const jinkoSource='https://www.jinkosolar.com/uploads/619f40ec/JKM550-570N-72HL4-BDV-F1-EN.pdf';
 const goodweSource='https://en.goodwe.com/Ftp/EN/Downloads/Datasheet/GW_ES-Uniq_Datasheet-EN.pdf';
@@ -14,10 +15,10 @@ export const INVERTERS=[
  {id:'goodwe-eh-5',brand:'GoodWe',model:'GW5000-EH',source:ehSource,revision:'Ficha EN consultada 2026-10-26',values:{inverterKw:5,dcMax:580,mpptMin:100,mpptMax:550,startVoltage:90,mppts:2,stringsPerMppt:1,mpptCurrent:12.5,mpptIsc:15.2,maxPvKw:6.65,backupLimit:5,batteryPower:5,phase:'single',voltage:230,system:'hybrid',inverterAcMaxCurrent:0},notes:'Batería HV 85–460 V; comprobar activación de respaldo. El límite de 12,5 A puede excluir módulos modernos. Corriente AC máxima y eficiencia: completar desde ficha/manual aplicable.'}
 ];
 export function applyCatalog(p,kind,id){
- const entry=(kind==='panel'?PANELS:kind==='inverter'?INVERTERS:[]).find(x=>x.id===id);
+ const entry=[...(kind==='panel'?PANELS:kind==='inverter'?INVERTERS:[]),...MARKET_PRODUCTS.filter(x=>x.category===kind&&x.values)].find(x=>x.id===id);
  if(!entry)throw new Error('Equipo no encontrado.');
  const prefix=kind==='panel'?'panel':'inverter';
  return {...p,...entry.values,[prefix+'Model']:`${entry.brand} ${entry.model}`,[prefix+'CatalogId']:id,
-  [prefix+'Source']:{source:entry.source,revision:entry.revision,checkedAt:CATALOG_REVISION,notes:entry.notes,values:entry.values}};
+  [prefix+'Source']:{source:entry.source,revision:entry.revision||'Ficha documentada en catálogo Chile',checkedAt:MARKET_DATE,notes:entry.notes,values:entry.values}};
 }
 export function catalogStatus(p,kind){const s=p[kind+'Source'];if(!s)return 'manual';return Object.entries(s.values).every(([k,v])=>p[k]===v)?'matched':'modified';}

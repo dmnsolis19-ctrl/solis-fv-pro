@@ -5,6 +5,7 @@
   <meta name="theme-color" content="#113c40"><meta name="description" content="SOLIS FV Pro: calculadora fotovoltaica profesional de predimensionamiento. Paneles, inversor, strings, cables, respaldo y materiales.">
   <title>SOLIS FV Pro · Ingeniería solar</title>
   <link rel="icon" type="image/svg+xml" href="./icon.svg"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./advanced.css"><link rel="stylesheet" href="./roof.css"><link rel="stylesheet" href="./schematic.css">
+  <script src="./theme.js"></script><link rel="stylesheet" href="./theme.css">
   <script type="module" src="./app.js"></script>
 </head>
 <body>
@@ -28,12 +29,12 @@
     <div class="nav-caption secondary-caption">ESPACIO DE TRABAJO</div>
     <button class="nav-item" id="projects-button"><span data-icon="folder"></span>Mis proyectos<span id="project-count" class="count">0</span></button>
     <button class="nav-item" data-tab="method"><span data-icon="book"></span>Memoria de cálculo</button>
-    <div class="sidebar-bottom"><div class="local-badge"><span class="green-dot"></span>Guardado en este navegador</div><p>Tu próximo proyecto<br><strong>empieza con un buen cálculo.</strong></p><div class="version">SOLIS FV Pro <span>v1.3.0</span></div></div>
+    <div class="sidebar-bottom"><div class="local-badge"><span class="green-dot"></span>Guardado en este navegador</div><p>Tu próximo proyecto<br><strong>empieza con un buen cálculo.</strong></p><div class="version">SOLIS FV Pro <span>v1.4.0</span></div></div>
   </aside>
   <div class="shell">
-    <header class="topbar"><div class="breadcrumb">Proyectos <span>/</span> <strong id="breadcrumb-project">Nuevo dimensionamiento</strong></div><div class="header-right"><span class="status-pill" id="draft-status">Borrador local</span><button class="icon-button" id="import-button" title="Importar proyecto JSON" aria-label="Importar proyecto JSON"><span data-icon="upload"></span></button></div></header>
+    <header class="topbar"><div class="breadcrumb">Proyectos <span>/</span> <strong id="breadcrumb-project">Nuevo dimensionamiento</strong></div><div class="header-right"><select id="theme-select" class="theme-select" aria-label="Tema de la plataforma"><option value="system">Sistema</option><option value="light">Claro</option><option value="dark">Oscuro</option></select><span class="status-pill" id="draft-status">Borrador local</span><button class="icon-button" id="import-button" title="Importar proyecto JSON" aria-label="Importar proyecto JSON"><span data-icon="upload"></span></button></div></header>
     <main id="main" tabindex="-1">
-      <div class="page-heading"><div><div class="eyebrow">HERRAMIENTAS DE INGENIERÍA</div><h1 id="page-title">Dimensionamiento fotovoltaico</h1><p id="page-subtitle">De la demanda de energía a una solución solar bien definida.</p></div><div class="heading-actions"><button class="button secondary" id="save-button"><span data-icon="save"></span>Guardar proyecto</button><div class="export-wrap"><button class="button primary" id="export-button" aria-expanded="false" aria-controls="export-menu"><span data-icon="download"></span>Exportar<span data-icon="chevron"></span></button><div id="export-menu" class="dropdown" hidden><button data-export="xlsx">Excel · informe y materiales</button><button data-export="csv">CSV · lista de materiales</button><button data-export="pdf">PDF · imprimir informe</button><button data-export="json">JSON · proyecto editable</button></div></div></div></div>
+      <div class="page-heading"><div><div class="eyebrow">HERRAMIENTAS DE INGENIERÍA</div><h1 id="page-title">Dimensionamiento fotovoltaico</h1><p id="page-subtitle">De la demanda de energía a una solución solar bien definida.</p></div><div class="heading-actions"><button class="button secondary" id="save-button"><span data-icon="save"></span>Guardar proyecto</button><div class="export-wrap"><button class="button primary" id="export-button" aria-expanded="false" aria-controls="export-menu"><span data-icon="download"></span>Exportar<span data-icon="chevron"></span></button><div id="export-menu" class="dropdown" hidden><button data-export="xlsx">Excel · informe y materiales</button><button data-export="csv">CSV · lista de materiales</button><button data-export="pdf">PDF · descargar informe</button><button data-export="json">JSON · proyecto editable</button></div></div></div></div>
       <div class="context-strip"><div><span class="green-dot"></span><strong id="context-name"></strong><span class="context-divider">/</span><span id="context-location"></span></div><span class="demo-label">Predimensionamiento técnico</span></div>
       <div id="errors" class="validation-box" role="alert" hidden></div>
       <div id="screen"></div>
@@ -41,10 +42,12 @@
     </main>
   </div>
   <dialog id="projects-dialog"><div class="dialog-heading"><div><div class="eyebrow">ESPACIO DE TRABAJO</div><h2>Mis proyectos</h2></div><button class="icon-button" id="close-dialog" aria-label="Cerrar proyectos">✕</button></div><p class="muted">Disponibles en este navegador. Exporta JSON para conservar una copia o trasladarlos.</p><button id="new-button" class="button primary">+ Nuevo proyecto</button><div id="saved-projects"></div></dialog>
-  <dialog id="report-dialog"><div class="report-dialog-toolbar"><strong>Vista previa del informe</strong><button class="button primary" data-advanced="report-print">Imprimir / guardar PDF</button><button class="button secondary" data-advanced="report-close">Cerrar</button></div><div id="report-preview"></div></dialog>
+  <dialog id="report-dialog"><div class="report-dialog-toolbar"><strong>Vista previa del informe</strong><button class="button primary" data-advanced="report-pdf">Descargar PDF</button><button class="button secondary" data-advanced="report-print">Imprimir</button><button class="button secondary" data-advanced="report-close">Cerrar</button></div><div id="report-preview"></div></dialog>
+  <dialog id="market-dialog" aria-label="Proveedores y cotizaciones"></dialog>
   <dialog id="review-dialog" aria-label="Registrar revisión técnica"></dialog>
   <input type="file" id="import-file" accept="application/json,.json" hidden>
   <div id="toast" role="status" class="toast" hidden></div>
+  <div id="pdf-download-ready" role="status" class="pdf-download-ready" hidden></div>
   <section id="print-report" aria-label="Informe para imprimir"></section>
   <noscript>Activa JavaScript para usar la calculadora. Los cálculos se realizan en tu navegador.</noscript>
 </body></html>

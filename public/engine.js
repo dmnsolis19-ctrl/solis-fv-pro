@@ -3,14 +3,15 @@ import {solarMatches,solarRequest} from './solar.js';
 import {catalogStatus} from './catalog.js';
 import {ROOF_DEFAULTS,roofErrors,layoutRoof} from './roof.js';
 import {REVIEW_DEFAULTS,reviewErrors} from './review.js';
-export const VERSION = '1.3.0';
+import {SUPPLY_DEFAULTS,supplyErrors,selectionCompatible,offerExpired} from './procurement.js';
+export const VERSION = '1.4.0';
 export const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 export const DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
 // Illustrative ampacities ONLY. User must replace and explicitly verify against installation method.
 export const SECTIONS = [1.5,2.5,4,6,10,16,25,35,50,70,95,120];
 export const DEMO_AMPACITY = [15,20,26,34,46,61,80,99,119,151,182,210];
 export const DEFAULTS = Object.freeze({
-  ...ROOF_DEFAULTS,...REVIEW_DEFAULTS,
+  ...ROOF_DEFAULTS,...REVIEW_DEFAULTS,...SUPPLY_DEFAULTS,
   project:'Residencia Los Olivos', client:'Cliente de ejemplo', location:'Chile · recurso solar manual', company:'SOLIS Ingeniería', engineer:'',
   consumption:680, period:'month', coverage:100, hsp:4.5, performance:80, roof:60, spaceFactor:1.2,
   system:'hybrid', phase:'single', voltage:230, gridKw:9.2, pf:1, dcAcRatio:1.2,
@@ -84,7 +85,7 @@ export function normalize(raw) {
     try {validateHourly(p.hourlyProfile);}catch(error){errors.push(error.message);}
   }
   if(!p.unitPrices||typeof p.unitPrices!=='object'||Array.isArray(p.unitPrices)||Object.entries(p.unitPrices).some(([k,v])=>!/^[A-Z0-9-]{1,20}$/.test(k)||typeof v!=='number'||!Number.isFinite(v)||v<0||v>1e12)) errors.push('Precios unitarios no válidos.');
-  errors.push(...roofErrors(p),...reviewErrors(p));
+  errors.push(...roofErrors(p),...reviewErrors(p),...supplyErrors(p));
   if(errors.length) throw new InputError(errors);
   return p;
 }
@@ -240,7 +241,7 @@ export function calculate(raw) {
   if(p.system==='hybrid'&&p.backupKw>0&&p.autonomy===0) add('warning','Respaldo configurado sin autonomía: no se incluye batería. Confirma si el fabricante permite EPS sin batería.');
   if(Math.abs(p.vmp*p.imp-p.panelW)/p.panelW>0.08) add('warning','Vmp × Imp difiere más del 8 % de la potencia del módulo. Revisa la ficha técnica.');
   const bom=[];
-  const item=(code,category,description,qty,unit,price=0,note='')=>{price=p.unitPrices[code]??price;bom.push({code,category,description,qty,unit,price,total:qty*price,note});};
+  const item=(code,category,description,qty,unit,price=0,note='')=>{const chosen=p.procurement.selected[code];if(chosen){if(selectionCompatible(code,chosen,p,cables)){price=chosen.unitNet;note+=` Proveedor: ${chosen.supplier}; cotización ${chosen.quotedAt}; neto ${chosen.currency}.`;if(offerExpired(chosen))add('warning',`Cotización de ${chosen.supplier} para ${code} vencida; actualizar antes de comprar.`);}else add('warning',`La selección de proveedor para ${code} no coincide con equipo, sección o moneda actuales. Se usa el precio manual/de referencia.`);}price=p.unitPrices[code]??price;bom.push({code,category,description,qty,unit,price,total:qty*price,note});};
   item('FV-01','Generación',`${p.panelModel} · ${p.panelW} W`,panels,'ud',p.panelCost,layout.valid?'Cantidad compatible con strings calculados':'Pendiente de configuración válida');
   item('INV-01','Conversión',`${p.inverterModel} · ${inverterKw} kW · ${p.system==='hybrid'?'híbrido':'on-grid'}`,1,'ud',p.inverterCost,'Verificar todos los límites de ficha y certificaciones');
   item('EST-01','Estructura','Kit de montaje por módulo',panels,'kit',p.structureCost,'Anclajes, viento y estructura deben ser calculados');
@@ -248,13 +249,15 @@ export function calculate(raw) {
   let cableMeters=0;
   for(const [key,c] of Object.entries(cables)) if(c?.valid) {
     const strings=key==='dc'?layout.strings:1;
-    const qty=Math.ceil(c.length*c.conductors*strings*1.1);
+    const selected=p.procurement.selected['CAB-'+key.toUpperCase()],multi=selected&&selectionCompatible('CAB-'+key.toUpperCase(),selected,p,cables)&&selected.cores>1;
+    const qty=Math.ceil(c.length*(multi?1:c.conductors)*strings*1.1);
     cableMeters+=qty;
-    item('CAB-'+key.toUpperCase(),'Conductores',`${key==='dc'?'Solar DC':key==='grid'?'Empalme → tablero':key==='ac'?'Inversor → conexión AC':'EPS → tablero de respaldo'} · Cu ${c.section} mm²`,qty,'m',p.cableCost,`Conductores ${c.conductors} × ruta × ${strings} circuito(s) + 10 %. ${c.verified?'Tabla declarada validada por usuario':'Sección orientativa'}.`);
+    item('CAB-'+key.toUpperCase(),'Conductores',`${multi?selected.model+' · ':''}${key==='dc'?'Solar DC':key==='grid'?'Empalme → tablero':key==='ac'?'Inversor → conexión AC':'EPS → tablero de respaldo'} · Cu ${c.section} mm²`,qty,'m',p.cableCost,`${multi?'Metros de cable completo; ':''}Conductores ${multi?1:c.conductors} × ruta × ${strings} circuito(s) + 10 %. ${c.verified?'Tabla declarada validada por usuario':'Sección orientativa'}.`);
   }
   if(layout.valid) item('CON-01','Conexiones','Par de conectores solares compatibles',layout.strings*2,'par',0,'Cantidad preliminar, extremos de strings; misma marca y tipo');
   item('PRO-01','Protecciones','Protecciones AC/DC, diferencial, SPD, puesta a tierra y seccionamiento',1,'lote',p.otherCost,'Partida presupuestaria; tipos, polos, ratings, coordinación y fusibles por ingeniería');
   item('MO-01','Instalación','Mano de obra y puesta en servicio',1,'lote',p.laborCost,'Presupuesto editable; no incluye trámites ni impuestos');
+  for(const x of p.procurement.extras){if(x.offer.currency!==p.currency){add('warning',`Partida adicional ${x.offer.model} omitida por moneda distinta.`);continue;}item('EX-'+x.id,'Adicional proveedor',x.offer.model,x.qty,x.offer.unit,x.offer.unitNet,`Solo presupuesto; sin dimensionamiento del equipo adicional. Proveedor ${x.offer.supplier}, ${x.offer.quotedAt}.`);if(offerExpired(x.offer))add('warning',`Cotización adicional ${x.offer.model} vencida.`);}
   const capex=bom.reduce((s,i)=>s+i.total,0);
   const self=hourly?hourly.self:Math.min(production*p.selfConsumption/100,annual), exported=hourly?hourly.exported:production-self;
   const grossSaving=self*p.buyTariff+exported*p.sellTariff, netSaving=grossSaving-p.maintenance;
