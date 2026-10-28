@@ -1,3 +1,4 @@
+import {pumpingForm,pumpingResults,setupPumping} from './pumping-ui.js';
 import {escapeHTML as e,download,workbookBytes} from './exports.js';
 import {MONTHS} from './engine.js';
 import {fetchSolar,solarFromPVGIS,pvgisURL,solarMatches} from './solar.js';
@@ -14,14 +15,16 @@ const changedSummary=keys=>[...new Set(keys.map(k=>({initial:'Primera emisión',
 const field=(p,k,label,help='',type='number')=>`<div class="field"><label for="field-${k}">${label}</label><input id="field-${k}" data-field="${k}" type="${type}" ${type==='number'?'step="any"':'maxlength="240"'} value="${e(p[k])}">${help?`<small>${e(help)}</small>`:''}</div>`;
 const section=(title,body)=>`<section class="advanced-form-section"><h3>${title}</h3><div class="form-grid">${body}</div></section>`;
 const card=(title,body,subtitle='')=>`<section class="card"><div class="card-heading"><div><h2>${title}</h2>${subtitle?`<p>${subtitle}</p>`:''}</div></div>${body}</section>`;
-export const NEW_TITLES={schematic:['Unifilar y revisión técnica','Documenta la topología y los puntos pendientes de ingeniería.'],roof:['Cubierta y distribución 2D','Comprueba el espacio disponible y ajusta la implantación del generador.'],site:['Ubicación y recurso solar','Sitio, orientación y datos solares con procedencia verificable.'],catalog:['Catálogo técnico','Equipos contrastados con fichas de sus fabricantes.'],compare:['Comparación de alternativas','Evalúa diseños bajo los mismos supuestos antes de decidir.'],report:['Informe y revisiones','Una entrega profesional con identidad, resultados y trazabilidad.']};
+export const NEW_TITLES={pumping:['Bombeo solar y variadores','Hidráulica, energía solar y selección preliminar con límites documentados.'],schematic:['Unifilar y revisión técnica','Documenta la topología y los puntos pendientes de ingeniería.'],roof:['Cubierta y distribución 2D','Comprueba el espacio disponible y ajusta la implantación del generador.'],site:['Ubicación y recurso solar','Sitio, orientación y datos solares con procedencia verificable.'],catalog:['Catálogo técnico','Equipos contrastados con fichas de sus fabricantes.'],compare:['Comparación de alternativas','Evalúa diseños bajo los mismos supuestos antes de decidir.'],report:['Informe y revisiones','Una entrega profesional con identidad, resultados y trazabilidad.']};
 export function advancedForm(tab,p){
+ if(tab==='pumping')return pumpingForm(p);
  if(tab==='roof')return roofForm(p);
  if(tab==='site')return section('Coordenadas del sitio',field(p,'location','Nombre de ubicación','','text')+field(p,'latitude','Latitud · WGS84','Sur negativo; ejemplo: −33,45')+field(p,'longitude','Longitud · WGS84','Oeste negativo; ejemplo: −70,66')+`<div class="wide city-shortcuts"><button type="button" data-city="santiago">Santiago</button><button type="button" data-city="antofagasta">Antofagasta</button><button type="button" data-city="concepcion">Concepción</button><button type="button" data-city="lima">Lima</button><button type="button" data-city="juliaca">Juliaca</button></div>`)+section('Plano del generador',field(p,'tilt','Inclinación · grados','0° horizontal, 90° vertical.')+field(p,'azimuth','Azimut · grados','0° norte, 90° este, 180° sur, 270° oeste.')+`<div class="wide note">En el hemisferio sur, norte corresponde a azimut 0°. La consulta aplica este plano al recurso; no rota físicamente el esquema de módulos.</div><button type="button" class="button primary wide" data-advanced="solar-fetch">Consultar recurso PVGIS</button><p class="wide form-note">Consulta externa a PVGIS mediante Cloudflare. Envía coordenadas e inclinación/orientación; no envía cliente ni datos de consumo.</p><button type="button" class="button secondary wide" data-advanced="solar-link">Abrir solicitud PVGIS</button><button type="button" class="button secondary wide" data-advanced="solar-import">Importar respuesta JSON PVGIS</button><p class="wide form-note">Importa solo la respuesta de la solicitud anterior. Se comprueba que sus coordenadas y plano coincidan. Los valores nuevos se aplican únicamente si la respuesta es válida.</p>`);
  if(tab==='report')return section('Identidad de la entrega',field(p,'company','Empresa','','text')+field(p,'engineer','Responsable','','text')+field(p,'reviewer','Revisor','','text')+field(p,'documentCode','Código documental','','text')+field(p,'documentRevision','Revisión','','text')+`<div class="field"><label for="field-documentStatus">Estado documental</label><select id="field-documentStatus" data-field="documentStatus"><option value="draft" ${p.documentStatus==='draft'?'selected':''}>Borrador</option><option value="review" ${p.documentStatus==='review'?'selected':''}>Para revisión</option></select></div>`+field(p,'reportNotes','Observaciones · máx. 240 caracteres','','text')+`<div class="wide logo-controls">${p.logoData?`<img src="${p.logoData}" alt="Logo de empresa cargado">`:''}<button type="button" class="button secondary" data-advanced="logo-upload">Cargar logo PNG/JPEG</button>${p.logoData?'<button type="button" class="text-button" data-advanced="logo-remove">Quitar</button>':''}<small>Máximo 250 KB. Se guarda dentro del proyecto JSON.</small></div>`);
  return '';
 }
 export function advancedResults(tab,r,history=[]){
+ if(tab==='pumping')return pumpingResults(r);
  if(tab==='roof')return roofResults(r);
  if(tab==='schematic')return schematicResults(r);
  const p=r.p,money=n=>new Intl.NumberFormat('es-CL',{style:'currency',currency:p.currency,maximumFractionDigits:0}).format(n);
@@ -41,6 +44,7 @@ export function advancedResults(tab,r,history=[]){
  return '';
 }
 export function setupAdvanced({getInputs,setInputs,repaint,notify,save,getResult,getHistory}){
+ setupPumping({getInputs,setInputs,repaint,getResult,notify});
  setupMarket({getInputs,setInputs,repaint,notify,getResult});
  const geo=setupGeocoder({getInputs,setInputs,repaint,notify});
  const roof=setupRoof({getInputs,setInputs,repaint,notify,getResult});

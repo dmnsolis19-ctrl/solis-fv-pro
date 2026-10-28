@@ -1,16 +1,18 @@
+import {PUMP_DEFAULTS,pumpErrors,calculatePumping} from './pumping.js';
 /** Deterministic preliminary engineering. No network, DOM or hidden weather data. */
 import {solarMatches,solarRequest} from './solar.js';
 import {catalogStatus} from './catalog.js';
 import {ROOF_DEFAULTS,roofErrors,layoutRoof} from './roof.js';
 import {REVIEW_DEFAULTS,reviewErrors} from './review.js';
 import {SUPPLY_DEFAULTS,supplyErrors,selectionCompatible,offerExpired} from './procurement.js';
-export const VERSION = '1.4.0';
+export const VERSION = '1.5.0';
 export const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 export const DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
 // Illustrative ampacities ONLY. User must replace and explicitly verify against installation method.
 export const SECTIONS = [1.5,2.5,4,6,10,16,25,35,50,70,95,120];
 export const DEMO_AMPACITY = [15,20,26,34,46,61,80,99,119,151,182,210];
 export const DEFAULTS = Object.freeze({
+  pumping:PUMP_DEFAULTS,
   ...ROOF_DEFAULTS,...REVIEW_DEFAULTS,...SUPPLY_DEFAULTS,
   project:'Residencia Los Olivos', client:'Cliente de ejemplo', location:'Chile · recurso solar manual', company:'SOLIS Ingeniería', engineer:'',
   consumption:680, period:'month', coverage:100, hsp:4.5, performance:80, roof:60, spaceFactor:1.2,
@@ -29,7 +31,7 @@ export const DEFAULTS = Object.freeze({
   gammaPower:-0.35, soiling:2, shadeLoss:0, mismatch:2, dcLoss:1.5, inverterEfficiency:97, acLoss:1,
   batteryPower:5, hourlyProfile:null, unitPrices:{}, gridMinSection:6,acMinSection:4,backupMinSection:2.5,
   latitude:-33.45,longitude:-70.66,tilt:25,azimuth:0,solarResource:null,
-  panelCatalogId:'',inverterCatalogId:'',panelSource:null,inverterSource:null,inverterAcMaxCurrent:0,
+  integrationProjectId:'',panelCatalogId:'',inverterCatalogId:'',panelSource:null,inverterSource:null,inverterAcMaxCurrent:0,
   documentCode:'SOL-FV-001',documentRevision:'01',documentStatus:'draft',reviewer:'',reportNotes:'',logoData:''
 });
 const LIMITS = {
@@ -59,7 +61,7 @@ export function normalize(raw) {
   }
   for (const k of ['mppts','stringsPerMppt','years']) if (!Number.isInteger(p[k])) errors.push(`${k}: debe ser entero.`);
   for (const [k,options] of Object.entries({period:['day','month','year'],phase:['single','three'],system:['grid','hybrid'],currency:['CLP','USD','PEN']})) if(!options.includes(p[k])) errors.push(`${k}: opción no válida.`);
-  for (const k of ['project','client','location','company','engineer','panelModel','inverterModel','cableReference','panelCatalogId','inverterCatalogId','documentCode','documentRevision','reviewer','reportNotes']) if(typeof p[k]!=='string'||p[k].length>240) errors.push(`${k}: texto no válido (máximo 240 caracteres).`);
+  for (const k of ['integrationProjectId','project','client','location','company','engineer','panelModel','inverterModel','cableReference','panelCatalogId','inverterCatalogId','documentCode','documentRevision','reviewer','reportNotes']) if(typeof p[k]!=='string'||p[k].length>240) errors.push(`${k}: texto no válido (máximo 240 caracteres).`);
   if(!['draft','review'].includes(p.documentStatus))errors.push('Estado documental no válido.');
   if(typeof p.logoData!=='string'||p.logoData.length>400000||(p.logoData&&!/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(p.logoData)))errors.push('Logo no válido: PNG/JPEG hasta 250 KB.');
   if(p.solarResource!==null){
@@ -85,6 +87,8 @@ export function normalize(raw) {
     try {validateHourly(p.hourlyProfile);}catch(error){errors.push(error.message);}
   }
   if(!p.unitPrices||typeof p.unitPrices!=='object'||Array.isArray(p.unitPrices)||Object.entries(p.unitPrices).some(([k,v])=>!/^[A-Z0-9-]{1,20}$/.test(k)||typeof v!=='number'||!Number.isFinite(v)||v<0||v>1e12)) errors.push('Precios unitarios no válidos.');
+  if(p.pumping&&typeof p.pumping==='object'&&!Array.isArray(p.pumping))p.pumping={...PUMP_DEFAULTS,...p.pumping};
+  errors.push(...pumpErrors(p.pumping));
   errors.push(...roofErrors(p),...reviewErrors(p),...supplyErrors(p));
   if(errors.length) throw new InputError(errors);
   return p;
@@ -273,5 +277,5 @@ export function calculate(raw) {
     return {year,cash,cumulative};
   });
   add('info',hourly?'Simulación horaria con POA y temperatura de célula importadas. Batería equivalente acoplada en AC, SOC inicial vacío, sin tarifa horaria ni simulación geométrica de sombras.':'HSP, precios y tarifas son supuestos editables. El balance anual no prueba autonomía ni autoconsumo horario; no incluye sombras, clipping ni estudio estructural.');
-  return {version:VERSION,p,annual,specificYield,requiredKw,targetPanels,panels,dcKw,inverterKw,ratio,layout,roofPlan,monthly,production,coverage,area,gridCurrent,acCurrent,backupCurrent,backupVoltage,cables,batteryRequired,batteries,batteryKwh,bom,cableMeters,capex,self,exported,grossSaving,netSaving,payback,npv,cashflow,hourly,alerts,blocked:alerts.some(a=>a.level==='error')};
+  return {pumping:calculatePumping(p),version:VERSION,p,annual,specificYield,requiredKw,targetPanels,panels,dcKw,inverterKw,ratio,layout,roofPlan,monthly,production,coverage,area,gridCurrent,acCurrent,backupCurrent,backupVoltage,cables,batteryRequired,batteries,batteryKwh,bom,cableMeters,capex,self,exported,grossSaving,netSaving,payback,npv,cashflow,hourly,alerts,blocked:alerts.some(a=>a.level==='error')};
 }

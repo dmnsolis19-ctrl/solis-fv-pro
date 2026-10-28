@@ -1,4 +1,4 @@
-# Actualizar a SOLIS FV Pro 1.4.0
+# Actualizar a SOLIS FV Pro 1.5.0
 
 ## Desde GitHub Desktop
 
@@ -7,7 +7,7 @@
 3. En GitHub Desktop selecciona el repositorio existente y **Repository → Show in Explorer**.
 4. Copia el contenido de la nueva carpeta `solis-fv-pro` dentro de tu repositorio. Reemplaza los archivos con el mismo nombre. Conserva la carpeta `.git` de tu repositorio.
 5. Comprueba que `package.json`, `public`, `server`, `functions` y `wrangler.jsonc` estén directamente en la raíz, sin otra carpeta intermedia.
-6. En **Changes**, escribe `Actualizar SOLIS FV Pro a 1.4.0`, pulsa **Commit to main** y después **Push origin**.
+6. En **Changes**, escribe `Actualizar SOLIS FV Pro a 1.5.0`, pulsa **Commit to main** y después **Push origin**.
 
 No crees otro repositorio si ya subiste la versión anterior. No copies el ZIP como sustituto del código.
 
@@ -52,7 +52,7 @@ No uses `npx wrangler deploy` sin indicar esa configuración al elegir Workers. 
 
 ## Validación después de publicar
 
-1. Confirma que la interfaz muestre **v1.4.0**.
+1. Confirma que la interfaz muestre **v1.5.0**.
 2. Abre **Ubicación y recurso**, verifica las coordenadas del sitio, inclinación y azimut y pulsa **Consultar recurso PVGIS**.
 3. Una respuesta correcta mostrará PVGIS-ERA5, período disponible, fecha de consulta y 12 HSP mensuales. La cobertura de cada coordenada la determina el proveedor.
 4. Selecciona un módulo e inversor desde **Catálogo técnico** y revisa las alertas.
@@ -86,3 +86,9 @@ El historial registra **emisiones resumidas**, no copias completas restaurables.
 Copia también `public/vendor` (PDF y fuentes), `public/theme.js`, `public/theme.css`, los módulos de catálogo/proveedores/PDF/geocodificación y sus pruebas. Incluye `server/geocode-handler.js` y `functions/api/geocode.js`. No requiere migración de cuenta, token nuevo ni D1. La base de precios y los proyectos siguen siendo locales al navegador.
 
 Consulta [ubicación y PDF](UBICACION_Y_PDF.md) para límites de comprobación de servicios externos y descarga en el navegador de desarrollo.
+
+## Novedades v1.5
+
+Copie también `pumping.js`, `pumping-ui.js`, `quote-transfer.js` y sus pruebas. Abra Bombeo solar, active el estudio y reemplace los ejemplos por datos reales. Un arreglo incompatible o límites DC pendientes impiden exportar bombeo al cotizador. El presupuesto residencial no cambia.
+
+Exporte el archivo Cotizador SOLIS y ábralo desde una lista interna de la versión integrada del cotizador. El archivo JSON completo del proyecto FV sigue siendo un respaldo distinto. Consulte [integración](INTEGRACION_COTIZADOR.md) y [bombeo](BOMBEO_SOLAR.md). Esta actualización conserva los comandos Worker y no requiere token nuevo, D1 o R2 en la calculadora.

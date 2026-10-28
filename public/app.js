@@ -1,7 +1,10 @@
+import {PUMP_DRIVES} from './pumping.js';
+import {pumpingTransfer} from './pumping-ui.js';
+import {quoteTransfer} from './quote-transfer.js';
 import {solarMatches} from './solar.js';
 import {advancedForm,advancedResults,NEW_TITLES,setupAdvanced} from './advanced-ui.js';
 import {DEFAULTS, VERSION, MONTHS, SECTIONS, calculate, normalize, parseHourlyCSV} from './engine.js';
-import {parseProject, readSaved, saveProject} from './persistence.js';
+import {projectId, parseProject, readSaved, saveProject} from './persistence.js';
 import {escapeHTML as e, materialsCSV, workbookBytes, reportSheets, projectJSON, download} from './exports.js';
 
 const $=s=>document.querySelector(s);
@@ -39,7 +42,7 @@ function field(key,label,unit='',help='',opts={}) {
 function group(title,body,open=false,badge='') {return `<details class="form-group" ${open?'open':''}><summary>${title}${badge?`<span class="tiny-badge">${badge}</span>`:''}${icon('chevron')}</summary><div class="form-grid">${body}</div></details>`;}
 function card(title,subtitle,body,extra=''){return `<section class="card ${extra}"><div class="card-heading"><div><h2>${title}</h2>${subtitle?`<p>${subtitle}</p>`:''}</div></div>${body}</section>`;}
 function renderForm() {
-  if(['site','report','roof'].includes(tab))return advancedForm(tab,p);
+  if(['site','report','roof','pumping'].includes(tab))return advancedForm(tab,p);
   const identity=group('Datos del proyecto',field('project','Nombre del proyecto','','',{text:true,wide:true})+field('client','Cliente','','',{text:true,wide:true})+field('location','Ubicación','','',{text:true,wide:true})+field('company','Empresa','','',{text:true})+field('engineer','Responsable','','',{text:true}));
   if(tab==='design')return identity+
     group('Consumo y objetivo',field('consumption','Energía consumida','kWh',p.hourlyProfile?'El perfil horario importado determina el consumo real.':'Ingresa energía de la cuenta eléctrica, no potencia.')+field('period','Período','','',{options:[['day','Por día'],['month','Por mes'],['year','Por año']]})+field('coverage','Cobertura objetivo','%')+field('system','Tipo de sistema','','',{options:[['grid','Conectado a red'],['hybrid','Híbrido con respaldo']]})+field('gridKw','Potencia del empalme','kW')+field('phase','Red eléctrica','','',{options:[['single','Monofásica'],['three','Trifásica']]})+field('voltage','Tensión de red','V','Trifásico: tensión entre fases.')+field('roof','Superficie disponible','m²',p.roofLayout?'Cubierta 2D activa: la geometría determina el espacio.':'Estimación por área; activa Cubierta 2D para verificar el patrón.'),true,'01')+
@@ -92,7 +95,7 @@ function methodResults(r) {
 function renderScreen(){
   const [title,subtitle]=titles[tab];$('#page-title').textContent=title;$('#page-subtitle').textContent=subtitle;
   document.querySelectorAll('.nav-item[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===tab);if(b.dataset.tab===tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
-  const form=['design','electrical','finance','site','report','roof'].includes(tab);
+  const form=['design','electrical','finance','site','report','roof','pumping'].includes(tab);
   $('#screen').innerHTML=form?`<div class="calculator-layout"><section class="input-panel"><div class="input-panel-heading"><h2>Parámetros del proyecto</h2><span>EDITABLES</span></div><form id="parameters" novalidate>${renderForm()}</form><div class="input-panel-footer">${icon('bolt')} Cálculo automático al editar</div></section><div id="results" class="results-column"></div></div>`:'<div id="results" class="full-results"></div>';
   updateResults();
 }
@@ -110,16 +113,18 @@ function updateResults(){
 function updateInput(event){
   const el=event.target;
   if(el.dataset.price){const val=el.value; p.unitPrices={...p.unitPrices,[el.dataset.price]:val===''?NaN:Number(val)};return;}
+  else if(el.dataset.pump){const k=el.dataset.pump;p.pumping={...p.pumping,[k]:el.type==='checkbox'?el.checked:k==='driveId'||k==='curve'?el.value:el.value===''?'':Number(el.value)};if(k==='driveId'){const d=PUMP_DRIVES.find(x=>x.id===el.value);p.pumping={...p.pumping,dcMax:d.dcMax,dcAmps:0,dcIsc:0,pvMaxKw:0};}}
   else if(el.dataset.month!==undefined){p.monthlyHsp=[...p.monthlyHsp];p.monthlyHsp[Number(el.dataset.month)]=el.value===''?NaN:Number(el.value);}
   else if(el.dataset.field){const k=el.dataset.field;p[k]=el.type==='checkbox'?el.checked:el.type==='number'?(el.value===''?'':Number(el.value)):el.value; if(k==='monthlySolar')$('.monthly-inputs').hidden=!el.checked;if(k==='ampacity'||k==='tempFactor'||k==='groupFactor'||k==='cableReference'){p.ampacityVerified=false;const check=$('[data-field="ampacityVerified"]');if(check)check.checked=false;}}
   else return;
   clearTimeout(timer);timer=setTimeout(updateResults,180);
 }
 document.addEventListener('input',updateInput);
-document.addEventListener('change',event=>{if(event.target.matches('select[data-field],[type="checkbox"][data-field],.price-input')){clearTimeout(timer);updateResults();}});
+document.addEventListener('change',event=>{if(event.target.matches('select[data-field],[type="checkbox"][data-field],.price-input,select[data-pump],[type="checkbox"][data-pump]')){clearTimeout(timer);updateResults();}});
 function showProjects(){const items=readSaved(localStorage);$('#project-count').textContent=items.length;$('#saved-projects').innerHTML=items.map(x=>`<article class="saved-project"><div><strong>${e(x.inputs.project)}</strong><small>${e(x.inputs.client)} · ${new Date(x.updatedAt).toLocaleString('es-CL')}</small></div><button class="button small secondary" data-load="${e(x.id)}">Abrir</button><button class="icon-button delete-button" data-delete="${e(x.id)}" aria-label="Eliminar ${e(x.inputs.project)}">✕</button></article>`).join('')||'<p class="empty-state">Aún no hay proyectos guardados. Guarda el primer diseño para continuar más tarde.</p>';$('#projects-dialog').showModal();}
 function doSave(){clearTimeout(timer);updateResults();if(!result)return;try{const saved=saveProject(localStorage,p,activeId);activeId=saved.id;$('#project-count').textContent=readSaved(localStorage).length;localStorage.setItem('solis-fv-draft-v1',JSON.stringify({id:activeId,inputs:p}));toast('Proyecto y emisión guardados. Exporta JSON para conservar la entrada completa.');if(tab==='report')renderScreen();}catch{toast('No se pudo guardar: el almacenamiento puede estar lleno o bloqueado. Exporta el proyecto en JSON.');}}
 function doExport(type){clearTimeout(timer);updateResults();if(!result)return;const name=(p.project||'proyecto-solar').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9-]+/g,'-').slice(0,80);
+ if(type==='quote'||type==='pump'){try{if(!p.integrationProjectId){p=normalize({...p,integrationProjectId:projectId()});updateResults();}download(JSON.stringify(type==='pump'?pumpingTransfer(result):quoteTransfer(result),null,2),name+(type==='pump'?'-bombeo':'')+'-cotizador.solis-fv.json','application/json');toast('Diseño exportado. En el cotizador, abre un borrador e importa el archivo desde Listas internas. Precios pendientes de confirmar.');}catch(error){toast(error.message);}}
  if(type==='xlsx')download(workbookBytes(reportSheets(result)),name+'.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
  if(type==='csv')download(materialsCSV(result),name+'-materiales.csv','text/csv;charset=utf-8');
  if(type==='json')download(projectJSON(p),name+'.json','application/json');

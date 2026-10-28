@@ -1,16 +1,22 @@
-# SOLIS FV Pro 1.4.0
+# SOLIS FV Pro 1.5.0
 
 Plataforma web en español para predimensionamiento fotovoltaico y simulación horaria con datos importados. Lista para GitHub y Cloudflare Pages/Workers, con unifilar conceptual, revisión técnica, cubierta 2D, consulta solar por servidor, catálogo técnico, comparación de diseños e informe con identidad y revisión documental.
 
 ## Cambios de esta versión
 
+- **Integración SOLIS Cotizador v3.9:** archivo de diseño/materiales con identidad estable, vista previa de cambios, reemplazo sin duplicación y precios pendientes. [Guía de integración](docs/INTEGRACION_COTIZADOR.md).
+- **Bombeo solar:** caudal, HDT, Darcy-Weisbach/Colebrook, curva Q-H e intersección, potencia en el punto de trabajo, energía, generador FV, límites de motor/VFD y NPSH declarado. Anexo Excel/HTML/PDF y exportación separada al cotizador. [Método y límites](docs/BOMBEO_SOLAR.md).
+- **Variadores Chile:** 3 INVT con fuente técnica y referencia comercial; límites DC específicos pendientes de ficha exacta. No se inventan parámetros o stock.
+
+Funciones de v1.4 conservadas:
+
 - **Tema claro, oscuro y sistema**, con preferencia persistente.
 - **Ubicación:** sugerencias locales de 56 ciudades/comunas chilenas, selección que actualiza coordenadas y búsqueda online por Photon a través de `/api/geocode`, con mensajes claros de error.
-- **Catálogo Chile:** 16 referencias Solis, Victron Energy, Canadian Solar, Jinko y cables DC/AC. Fuente técnica y referencia comercial visibles. Solo los 4 registros con parámetros documentados alimentan directamente el cálculo.
+- **Catálogo Chile:** 19 referencias: 3 variadores INVT y referencias Solis, Victron Energy, Canadian Solar, Jinko y cables DC/AC. Fuente técnica y referencia comercial visibles. Solo los 4 registros con parámetros documentados alimentan directamente el cálculo.
 - **Proveedores:** múltiples cotizaciones por producto, presentaciones/rollos, precios netos o con impuesto, fechas, vigencia y moneda. Copias estables en cada proyecto, compatibilidad con partidas y metros de cable multiconductor.
 - **Respaldo de precios:** JSON de base, restauración anterior y Excel. Almacenamiento local; no hay aún una base compartida en nube.
 - **PDF descargable:** tipografía incorporada, gráfico mensual, tablas con continuación, logo, cubierta/unifilar opcionales, presupuesto, cotizaciones y trazabilidad. Vista previa HTML e impresión conservadas.
-- **Publicación:** sintaxis y 68 pruebas antes de generar `dist`. Se conserva el Worker y el comando de despliegue existente.
+- **Publicación:** sintaxis y 77 pruebas antes de generar `dist`. Se conserva el Worker y el comando de despliegue existente.
 
 Guías: [catálogo y proveedores](docs/CATALOGO_CHILE_Y_PROVEEDORES.md), [ubicación, tema y PDF](docs/UBICACION_Y_PDF.md), [actualización](docs/ACTUALIZAR.md).
 
@@ -81,7 +87,7 @@ La carga de un ZIP estático por el panel conserva cálculos manuales y catálog
 
 ## Funciones conservadas
 
-Consumo en kWh/día, mes o año; cobertura; módulos y superficie; inversor automático/manual; strings iguales y MPPT; Voc frío y Vmp caliente; cables Cu de empalme, AC, EPS y por string DC; autonomía y baterías; CSV anual UTC 8760/8784 h; clipping, pérdidas y batería equivalente AC; materiales con precios individuales; finanzas; Excel real de 8 hojas generales más Cubierta/Proveedores cuando corresponden, CSV, JSON y PDF directo; proyectos y borrador locales.
+Consumo en kWh/día, mes o año; cobertura; módulos y superficie; inversor automático/manual; strings iguales y MPPT; Voc frío y Vmp caliente; cables Cu de empalme, AC, EPS y por string DC; autonomía y baterías; CSV anual UTC 8760/8784 h; clipping, pérdidas y batería equivalente AC; materiales con precios individuales; finanzas; Excel real de 8 hojas generales más Cubierta/Proveedores/Bombeo cuando corresponden, CSV, JSON y PDF directo; proyectos y borrador locales.
 
 ## Uso recomendado
 
@@ -98,6 +104,8 @@ Consumo en kWh/día, mes o año; cobertura; módulos y superficie; inversor auto
 
 ## Límites que debes conocer
 
+- Bombeo estacionario con una tubería equivalente. Sin cálculo de transitorios, simulación horaria, selección completa de bomba o conductores/protecciones VFD. No equivale a ingeniería de ejecución. [Alcance detallado](docs/BOMBEO_SOLAR.md).
+
 - Cubierta 2D: un rectángulo coplanar, patrón uniforme anclado al retiro superior izquierdo. No admite polígonos, mezcla de orientaciones, varias aguas ni optimización global. Las medidas son sobre el plano inclinado. Retiros y resguardos manuales; sin comprobación normativa automática.
 - Los colores de strings no calculan rutas ni longitudes de cable. Vista e informe limitados a las primeras 500 celdas; SVG/Excel completos. Límite de cálculo de 20.000 celdas por patrón, 50 obstáculos y 5.000 exclusiones.
 - Predimensionamiento para revisión profesional; no certifica cumplimiento normativo ni equivale a PV*SOL. Sin sombras 3D ni cálculo estructural.
@@ -111,7 +119,10 @@ Consumo en kWh/día, mes o año; cobertura; módulos y superficie; inversor auto
 
 ## Validación
 
-68 pruebas automáticas: proveedores (impuestos, presentaciones, compatibilidad, snapshots y respaldo), geocodificación y PDF, además de topología grid/híbrida, EPS, revisiones requeridas, invalidación por cambios, estados inactivos, independencia de los errores, esquema importado y exportación, además de geometría, retiros y separaciones, obstáculos/resguardos, unión de áreas, exclusiones, límites, ajuste de cobertura, coherencia de BOM, SVG/Excel/informe y migración; además del motor original, conversión de azimut, transformación de irradiación a HSP, procedencia, rechazo de coordenadas/plano incorrectos, API y caché, errores externos, catálogo, corrientes AC de ficha, incompatibilidades, comparación aislada, compatibilidad JSON, emisiones, informe y seguridad del texto, logo en Excel, y proyección cartográfica. Incluye 200 escenarios deterministas de strings y 120 de geometría dentro de la suite.
+Build v1.5 completo: 77 pruebas aprobadas, incluyendo hidráulica, intersección Q-H, potencia real, límites DC, exportación separada y contrato de integración. Lectura inicial de la interfaz en navegador completada; la revisión visual de la última actualización quedó pendiente al bloquearse la recarga por la política de acceso del navegador de pruebas. El build del cotizador se revisa por separado en su rama propuesta; no está implícito en esta validación.
+
+
+77 pruebas automáticas: proveedores (impuestos, presentaciones, compatibilidad, snapshots y respaldo), geocodificación y PDF, además de topología grid/híbrida, EPS, revisiones requeridas, invalidación por cambios, estados inactivos, independencia de los errores, esquema importado y exportación, además de geometría, retiros y separaciones, obstáculos/resguardos, unión de áreas, exclusiones, límites, ajuste de cobertura, coherencia de BOM, SVG/Excel/informe y migración; además del motor original, conversión de azimut, transformación de irradiación a HSP, procedencia, rechazo de coordenadas/plano incorrectos, API y caché, errores externos, catálogo, corrientes AC de ficha, incompatibilidades, comparación aislada, compatibilidad JSON, emisiones, informe y seguridad del texto, logo en Excel, y proyección cartográfica. Incluye 200 escenarios deterministas de strings y 120 de geometría dentro de la suite.
 
 ## Código
 

@@ -1,3 +1,4 @@
+import {pumpingRows} from './pumping.js';
 import { projectEnvelope } from './persistence.js';
 import {roofRows} from './roof.js';
 import {reviewRows,reviewState} from './review.js';
@@ -56,6 +57,7 @@ export function reportSheets(r) {
   const review=reviewState(r);sheets.push({name:'Revisión técnica',rows:[['Revisión técnica','Declaraciones del usuario; no certifican el diseño'],['Vigentes / aplicables',`${review.reviewed+review.na} / ${review.total}`],['Pendientes',review.pending],['Por cambios técnicos',review.stale],[],...reviewRows(r),[],...circuitRows(r)]});
   if(r.p.roofLayout){const plan=r.roofPlan;sheets.push({name:'Cubierta 2D',rows:[['Cubierta 2D','Plano conceptual sin sombras ni estructura'],['Estado',plan.valid?(plan.fits?'Cabe':'NO CABE'):plan.reason],['Módulos requeridos',r.panels],['Capacidad del patrón',plan.capacity],['Módulos representados',plan.placed],['Ancho cubierta m',r.p.roofWidth],['Largo cubierta m',r.p.roofLength],['Retiro m',r.p.roofMargin],['Patrón',plan.orientation??r.p.layoutOrientation],['Rutas de cables','No se deducen del plano; longitudes manuales'],[],...roofRows(plan),[],['Obstáculo ID','Nombre','Tipo','X m','Y m','Ancho m','Largo m','Resguardo m'],...r.p.roofObstacles.map(o=>[o.id,o.name,o.kind,o.x,o.y,o.width,o.length,o.clearance]),[],['Celda excluida'],...r.p.roofExcluded.map(id=>[id])]});}
   if(supplyRows(r.p).length>1)sheets.push({name:'Proveedores',rows:supplyRows(r.p)});
+  if(r.p.pumping.enabled)sheets.push({name:'Bombeo solar',rows:pumpingRows(r)});
   return sheets;
 }
 export function projectJSON(p) {return JSON.stringify(projectEnvelope(p),null,2);}

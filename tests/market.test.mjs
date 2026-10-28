@@ -10,7 +10,7 @@ const offer=(productId='canadian-cs6w-550ms',extra={})=>({id:'price-1',productId
 const memory=()=>{const map=new Map();return {getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v)};};
 const project=()=>applyCatalog(applyCatalog(structuredClone(DEFAULTS),'panel','canadian-cs6w-550ms'),'inverter','solis-s6-plus-6');
 test('Chile catalog separates documented parameter sets from reference-only architectures',()=>{
- assert.equal(MARKET_PRODUCTS.length,16);assert.equal(new Set(MARKET_PRODUCTS.map(x=>x.id)).size,16);
+ assert.equal(MARKET_PRODUCTS.length,19);assert.equal(new Set(MARKET_PRODUCTS.map(x=>x.id)).size,19);
  for(const x of MARKET_PRODUCTS){assert.equal(new URL(x.source).protocol,'https:');assert.equal(new URL(x.retail).protocol,'https:');if(x.brand==='Victron Energy')assert.equal(x.values,undefined);}
  assert.throws(()=>applyCatalog(DEFAULTS,'panel','jinko-jkm550m'));
  const r=calculate(project());assert.ok(r.layout.valid);assert.equal(r.p.dcMax,500);assert.equal(r.p.imp,13.2);assert.equal(r.p.inverterKw,6);assert.equal(r.p.panelWidth,1.134);assert.equal(r.p.betaVmp,DEFAULTS.betaVmp);

@@ -1,0 +1,109 @@
+{
+  "schema": "solis-fv-quote/v1",
+  "source": {
+    "application": "SOLIS FV Pro",
+    "engineVersion": "1.5.0",
+    "projectId": "fv-demo-20261028-001",
+    "documentCode": "SOL-FV-001",
+    "revision": "01",
+    "generatedAt": "2026-10-28T12:00:00Z"
+  },
+  "project": {
+    "name": "Residencia Los Olivos",
+    "client": "Cliente de ejemplo",
+    "location": "Chile · recurso solar manual",
+    "currency": "CLP"
+  },
+  "design": {
+    "dcKw": 6.6,
+    "panels": 12,
+    "inverterKw": 6,
+    "batteryKwh": 15.36,
+    "productionKwhYear": 8672.4,
+    "preliminary": true,
+    "warnings": [
+      "Producción antes de clipping: el modelo simplificado no simula la limitación horaria del inversor.",
+      "Los calibres son orientativos: se usa una tabla térmica ilustrativa sin validar. Reemplázala y confirma método, aislamiento, temperatura y agrupamiento.",
+      "HSP, precios y tarifas son supuestos editables. El balance anual no prueba autonomía ni autoconsumo horario; no incluye sombras, clipping ni estudio estructural."
+    ]
+  },
+  "items": [
+    {
+      "code": "FV-01",
+      "description": "Módulo de ejemplo · 550 W · 550 W",
+      "quantity": 12,
+      "unit": "un",
+      "specification": ""
+    },
+    {
+      "code": "INV-01",
+      "description": "Inversor de ejemplo · verificar ficha · 6 kW · híbrido",
+      "quantity": 1,
+      "unit": "un",
+      "specification": ""
+    },
+    {
+      "code": "EST-01",
+      "description": "Kit de montaje por módulo",
+      "quantity": 12,
+      "unit": "kit",
+      "specification": ""
+    },
+    {
+      "code": "BAT-01",
+      "description": "Batería compatible · 5.12 kWh",
+      "quantity": 3,
+      "unit": "un",
+      "specification": ""
+    },
+    {
+      "code": "CAB-GRID",
+      "description": "Empalme → tablero · Cu 10 mm²",
+      "quantity": 50,
+      "unit": "m",
+      "specification": "Cu 10 mm²; ruta de ida 15 m. Cantidad de compra del listado, incluye 10 %; comprobar conductores y cable completo/unipolar. Tabla térmica orientativa sin validar."
+    },
+    {
+      "code": "CAB-AC",
+      "description": "Inversor → conexión AC · Cu 6 mm²",
+      "quantity": 50,
+      "unit": "m",
+      "specification": "Cu 6 mm²; ruta de ida 15 m. Cantidad de compra del listado, incluye 10 %; comprobar conductores y cable completo/unipolar. Tabla térmica orientativa sin validar."
+    },
+    {
+      "code": "CAB-BACKUP",
+      "description": "EPS → tablero de respaldo · Cu 2.5 mm²",
+      "quantity": 40,
+      "unit": "m",
+      "specification": "Cu 2.5 mm²; ruta de ida 12 m. Cantidad de compra del listado, incluye 10 %; comprobar conductores y cable completo/unipolar. Tabla térmica orientativa sin validar."
+    },
+    {
+      "code": "CAB-DC",
+      "description": "Solar DC · Cu 6 mm²",
+      "quantity": 88,
+      "unit": "m",
+      "specification": "Cu 6 mm²; ruta de ida 20 m. Cantidad de compra del listado, incluye 10 %; comprobar conductores y cable completo/unipolar. Tabla térmica orientativa sin validar."
+    },
+    {
+      "code": "CON-01",
+      "description": "Par de conectores solares compatibles",
+      "quantity": 4,
+      "unit": "par",
+      "specification": ""
+    },
+    {
+      "code": "PRO-01",
+      "description": "Protecciones AC/DC, diferencial, SPD, puesta a tierra y seccionamiento",
+      "quantity": 1,
+      "unit": "gl",
+      "specification": "Partida global de protecciones pendiente de ingeniería y desglose."
+    },
+    {
+      "code": "MO-01",
+      "description": "Mano de obra y puesta en servicio",
+      "quantity": 1,
+      "unit": "gl",
+      "specification": ""
+    }
+  ]
+}

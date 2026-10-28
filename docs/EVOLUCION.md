@@ -17,3 +17,8 @@ Orden recomendado: recurso meteorológico y catálogo técnico primero, luego ge
 
 
 Prioridades para robustez operativa: copias completas restaurables por revisión; detección de pérdida/corrupción del guardado; pruebas del recurso solar tras publicar; autenticación y aislamiento por empresa solo cuando exista necesidad multiusuario. El historial actual sigue siendo resumido, no un archivo de revisiones completas recuperables.
+
+
+## Siguiente etapa de ingeniería tras v1.5
+
+Bombeo: aforo/abatimiento, NPSHa por geometría y propiedades reales del agua, base de curvas de bomba con eficiencia/NPSHr, tuberías por tramos, perfil de presión, transitorios, almacenamiento y simulación solar horaria. Electricidad VFD: corriente de motor real, conductores y caída compatible con PWM, filtros dV/dt, armónicos, protecciones, PE y coordinación según fabricante. Incorporar cada subsistema con fuentes y casos verificados; no declarar estos cálculos resueltos por el estudio estacionario actual.
